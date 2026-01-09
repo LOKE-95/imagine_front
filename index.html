@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SupplyLens - Vendor Risk Intelligence Platform</title>
+  <meta name="description" content="AI-powered vendor risk assessment and management platform with 7 Azure AI services">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="logo-icon">🔍</div>
+          <span class="logo-text">SupplyLens</span>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Overview</div>
+          <div class="nav-item active" data-page="dashboard">
+            <span class="nav-item-icon">📊</span>
+            <span class="nav-item-text">Dashboard</span>
+          </div>
+        </div>
+        
+        <div class="nav-section">
+          <div class="nav-section-title">Vendor Management</div>
+          <div class="nav-item" data-page="vendors">
+            <span class="nav-item-icon">🏢</span>
+            <span class="nav-item-text">Vendors</span>
+          </div>
+          <div class="nav-item" data-page="add-vendor">
+            <span class="nav-item-icon">➕</span>
+            <span class="nav-item-text">Add Vendor</span>
+          </div>
+        </div>
+        
+        <div class="nav-section">
+          <div class="nav-section-title">Compliance</div>
+          <div class="nav-item" data-page="decisions">
+            <span class="nav-item-icon">📋</span>
+            <span class="nav-item-text">Decisions Log</span>
+          </div>
+        </div>
+        
+        <div class="nav-section">
+          <div class="nav-section-title">AI Services</div>
+          <div class="nav-item" data-page="ai-services">
+            <span class="nav-item-icon">🤖</span>
+            <span class="nav-item-text">AI Copilot</span>
+          </div>
+        </div>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="ai-services-badge">
+          <span class="ai-badge-icon">⚡</span>
+          <div class="ai-badge-content">
+            <div class="ai-badge-title">7 AI Services Active</div>
+            <div class="ai-badge-subtitle">Powered by Azure AI</div>
+          </div>
+          <div class="ai-badge-dot"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Dashboard Page -->
+      <section class="page-section active" id="page-dashboard">
+        <header class="page-header">
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-subtitle">Overview of vendor risk landscape</p>
+        </header>
+        
+        <div class="page-content">
+          <!-- Stats Cards -->
+          <div class="stats-grid" id="stats-grid">
+            <div class="card stat-card">
+              <div class="stat-icon purple">🏢</div>
+              <div class="stat-content">
+                <div class="stat-value" id="stat-total">0</div>
+                <div class="stat-label">Total Vendors</div>
+              </div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-icon red">🔴</div>
+              <div class="stat-content">
+                <div class="stat-value" id="stat-high">0</div>
+                <div class="stat-label">High Risk</div>
+              </div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-icon orange">🟠</div>
+              <div class="stat-content">
+                <div class="stat-value" id="stat-medium">0</div>
+                <div class="stat-label">Medium Risk</div>
+              </div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-icon green">🟢</div>
+              <div class="stat-content">
+                <div class="stat-value" id="stat-low">0</div>
+                <div class="stat-label">Low Risk</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Charts -->
+          <div class="charts-grid">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Risk Distribution</h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="riskDistributionChart"></canvas>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Vendor Criticality</h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="criticalityChart"></canvas>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Recent Vendors Table -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Recent Vendors</h3>
+              <button class="btn btn-secondary btn-sm" onclick="navigateTo('vendors')">View All</button>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Vendor</th>
+                    <th>Domain</th>
+                    <th>Criticality</th>
+                    <th>Risk Score</th>
+                    <th>Status</th>
+                    <th>Added</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-vendors-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vendors Page -->
+      <section class="page-section" id="page-vendors">
+        <header class="page-header">
+          <h1 class="page-title">Vendors</h1>
+          <p class="page-subtitle">Manage and assess vendor risks</p>
+        </header>
+        
+        <div class="page-content">
+          <!-- Filter Bar -->
+          <div class="filter-bar">
+            <div class="search-input-wrapper">
+              <span class="search-icon">🔍</span>
+              <input type="text" class="form-input search-input" id="vendor-search" placeholder="Search vendors...">
+            </div>
+            <select class="form-select" id="filter-criticality">
+              <option value="">All Criticality</option>
+              <option value="HIGH">High</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="LOW">Low</option>
+            </select>
+            <select class="form-select" id="filter-risk">
+              <option value="">All Risk Levels</option>
+              <option value="HIGH">High Risk</option>
+              <option value="MEDIUM">Medium Risk</option>
+              <option value="LOW">Low Risk</option>
+            </select>
+            <button class="btn btn-primary" onclick="navigateTo('add-vendor')">
+              <span>➕</span> Add Vendor
+            </button>
+          </div>
+          
+          <!-- Vendors Table -->
+          <div class="card">
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Vendor</th>
+                    <th>Domain</th>
+                    <th>Criticality</th>
+                    <th>Risk Score</th>
+                    <th>Confidence</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="vendors-table"></tbody>
+              </table>
+            </div>
+            <div class="empty-state hidden" id="vendors-empty">
+              <div class="empty-state-icon">🏢</div>
+              <h3 class="empty-state-title">No vendors found</h3>
+              <p class="empty-state-description">Add your first vendor to start risk assessment</p>
+              <button class="btn btn-primary" onclick="navigateTo('add-vendor')">Add Vendor</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Add Vendor Page -->
+      <section class="page-section" id="page-add-vendor">
+        <header class="page-header">
+          <h1 class="page-title">Add New Vendor</h1>
+          <p class="page-subtitle">Register a vendor for AI-powered risk assessment</p>
+        </header>
+        
+        <div class="page-content">
+          <div class="card" style="max-width: 720px;">
+            <div class="card-content">
+              <form id="add-vendor-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label required">Vendor Name</label>
+                    <input type="text" class="form-input" name="name" required placeholder="e.g., Stripe, Salesforce">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label required">Domain</label>
+                    <input type="text" class="form-input" name="domain" required placeholder="e.g., stripe.com">
+                  </div>
+                </div>
+                
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label required">Criticality</label>
+                    <select class="form-select" name="criticality" required>
+                      <option value="">Select criticality level</option>
+                      <option value="LOW">Low - Non-critical service</option>
+                      <option value="MEDIUM">Medium - Moderate business impact</option>
+                      <option value="HIGH">High - Critical business function</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label required">Environment</label>
+                    <select class="form-select" name="environment" required>
+                      <option value="">Select environment</option>
+                      <option value="PROD">Production</option>
+                      <option value="NON_PROD">Non-Production</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Contact Email</label>
+                  <input type="email" class="form-input" name="contactEmail" placeholder="security@vendor.com">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Description</label>
+                  <textarea class="form-textarea" name="description" placeholder="Brief description of the vendor and services provided..."></textarea>
+                </div>
+                
+                <div class="flex gap-4 mt-4">
+                  <button type="submit" class="btn btn-primary">
+                    <span>🚀</span> Add Vendor & Trigger Assessment
+                  </button>
+                  <button type="button" class="btn btn-secondary" onclick="navigateTo('vendors')">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Decisions Log Page -->
+      <section class="page-section" id="page-decisions">
+        <header class="page-header">
+          <h1 class="page-title">Decisions Log</h1>
+          <p class="page-subtitle">Audit trail of vendor risk decisions</p>
+        </header>
+        
+        <div class="page-content">
+          <!-- Filter Bar -->
+          <div class="filter-bar">
+            <select class="form-select" id="filter-decision-type">
+              <option value="">All Decision Types</option>
+              <option value="ONBOARDING">Onboarding</option>
+              <option value="RENEWAL">Renewal</option>
+              <option value="TERMINATION">Termination</option>
+              <option value="EXCEPTION">Exception</option>
+            </select>
+            <select class="form-select" id="filter-decision">
+              <option value="">All Decisions</option>
+              <option value="APPROVED">Approved</option>
+              <option value="REJECTED">Rejected</option>
+              <option value="PENDING">Pending Review</option>
+            </select>
+          </div>
+          
+          <!-- Decisions Table -->
+          <div class="card">
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Vendor</th>
+                    <th>Type</th>
+                    <th>Decision</th>
+                    <th>Risk Score</th>
+                    <th>Decided By</th>
+                    <th>Reason</th>
+                  </tr>
+                </thead>
+                <tbody id="decisions-table"></tbody>
+              </table>
+            </div>
+            <div class="empty-state hidden" id="decisions-empty">
+              <div class="empty-state-icon">📋</div>
+              <h3 class="empty-state-title">No decisions logged</h3>
+              <p class="empty-state-description">Decisions will appear here when you approve or reject vendors</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AI Services Page -->
+      <section class="page-section" id="page-ai-services">
+        <header class="page-header">
+          <h1 class="page-title">AI Copilot Services</h1>
+          <p class="page-subtitle">7 Azure AI services powering intelligent risk assessment</p>
+        </header>
+        
+        <div class="page-content">
+          <div class="ai-services-grid">
+            <!-- Service 1: Azure OpenAI -->
+            <div class="card ai-service-card">
+              <div class="service-header">
+                <div class="service-icon">🧠</div>
+                <div>
+                  <div class="service-name">Azure OpenAI (GPT-4)</div>
+                  <div class="service-weight">Weight: 70%</div>
+                </div>
+              </div>
+              <p class="service-description">Primary risk reasoning engine. Analyzes vendor data, security posture, and compliance history to generate comprehensive risk assessments with detailed explanations.</p>
+              <button class="btn btn-secondary btn-sm mt-4" onclick="askCopilot('How does GPT-4 analyze vendor risk?')">Ask Copilot</button>
+            </div>
+            
+            <!-- Service 2: Content Safety -->
+            <div class="card ai-service-card">
+              <div class="service-header">
+                <div class="service-icon">🛡️</div>
+                <div>
+                  <div class="service-name">Azure AI Content Safety</div>
+                  <div class="service-weight">Weight: 15%</div>
+                </div>
+              </div>
+              <p class="service-description">Scans vendor communications and documentation for harmful content, policy violations, and potential red flags in business communications.</p>
+              <button class="btn btn-secondary btn-sm mt-4" onclick="askCopilot('What does Content Safety check for?')">Ask Copilot</button>
+            </div>
+            
+            <!-- Service 3: Language -->
+            <div class="card ai-service-card">
+              <div class="service-header">
+                <div class="service-icon">💬</div>
+                <div>
+                  <div class="service-name">Azure AI Language</div>
+                  <div class="service-weight">Weight: 15%</div>
+                </div>
+              </div>
+              <p class="service-description">Performs sentiment analysis on vendor communications, extracts key phrases, and identifies concerning language patterns in contracts and correspondence.</p>
+              <button class="btn btn-secondary btn-sm mt-4" onclick="askCopilot('How is sentiment analysis used?')">Ask Copilot</button>
+            </div>
+            
+            <!-- Service 4: Document Intelligence -->
+            <div class="card ai-service-card">
+              <div class="service-header">
+                <div class="service-icon">📄</div>
+                <div>
+                  <div class="service-name">Azure Document Intelligence</div>
+                  <div class="service-weight">Evidence</div>
+                </div>
+              </div>
+              <p class="service-description">Extracts and analyzes SOC2, ISO 27001, and other compliance documents. Identifies audit periods, certifications, and any noted exceptions.</p>
+              <button class="btn btn-secondary btn-sm mt-4" onclick="askCopilot('What documents can be analyzed?')">Ask Copilot</button>
+            </div>
+            
+            <!-- Service 5: Anomaly Detector -->
+            <div class="card ai-service-card">
+              <div class="service-header">
+                <div class="service-icon">📈</div>
+                <div>
+                  <div class="service-name">Azure Anomaly Detector</div>
+                  <div class="service-weight">Evidence</div>
+                </div>
+              </div>
+              <p class="service-description">Monitors vendor risk score patterns over time. Detects unusual changes, identifies trends, and alerts on significant deviations from baseline.</p>
+              <button class="btn btn-secondary btn-sm mt-4" onclick="askCopilot('How are anomalies detected?')">Ask Copilot</button>
+            </div>
+            
+            <!-- Service 6: AI Search -->
+            <div class="card ai-service-card">
+              <div class="service-header">
+                <div class="service-icon">🔎</div>
+                <div>
+                  <div class="service-name">Azure AI Search (RAG)</div>
+                  <div class="service-weight">Evidence</div>
+                </div>
+              </div>
+              <p class="service-description">Retrieval-Augmented Generation for knowledge retrieval. Finds similar vendors, relevant policies, and historical assessment data for informed decisions.</p>
+              <button class="btn btn-secondary btn-sm mt-4" onclick="askCopilot('How does RAG work for vendors?')">Ask Copilot</button>
+            </div>
+            
+            <!-- Service 7: Bing News -->
+            <div class="card ai-service-card">
+              <div class="service-header">
+                <div class="service-icon">📰</div>
+                <div>
+                  <div class="service-name">Bing News Search</div>
+                  <div class="service-weight">Evidence</div>
+                </div>
+              </div>
+              <p class="service-description">Real-time news monitoring for vendor security incidents, data breaches, regulatory actions, and other relevant security news coverage.</p>
+              <button class="btn btn-secondary btn-sm mt-4" onclick="askCopilot('What news sources are monitored?')">Ask Copilot</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- AI Copilot Chat Widget -->
+  <button class="copilot-button" id="copilot-btn" title="AI Copilot">
+    🤖
+  </button>
+  
+  <div class="copilot-panel" id="copilot-panel">
+    <div class="copilot-header">
+      <div class="copilot-avatar">🤖</div>
+      <div class="copilot-info">
+        <h3>AI Copilot</h3>
+        <p>● Online - 7 services active</p>
+      </div>
+    </div>
+    
+    <div class="copilot-messages" id="copilot-messages">
+      <div class="chat-message bot">
+        <div class="message-avatar">🤖</div>
+        <div class="message-bubble">
+          Hello! I'm your AI Copilot powered by 7 Azure AI services. How can I help you with vendor risk assessment today?
+        </div>
+      </div>
+    </div>
+    
+    <div class="quick-suggestions" id="quick-suggestions">
+      <button class="quick-suggestion" onclick="askCopilot('Which vendors have high risk?')">High risk vendors?</button>
+      <button class="quick-suggestion" onclick="askCopilot('Show me compliance status')">Compliance status</button>
+      <button class="quick-suggestion" onclick="askCopilot('Any security alerts?')">Security alerts</button>
+    </div>
+    
+    <div class="copilot-input">
+      <input type="text" id="copilot-input" placeholder="Ask about vendor risks..." onkeypress="handleCopilotKeypress(event)">
+      <button onclick="sendCopilotMessage()">➤</button>
+    </div>
+  </div>
+
+  <!-- Risk Details Modal -->
+  <div class="modal-overlay" id="risk-modal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Risk Assessment Details</h3>
+        <button class="modal-close" onclick="closeModal('risk-modal')">✕</button>
+      </div>
+      <div class="modal-body" id="risk-modal-content">
+        <!-- Dynamic content -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('risk-modal')">Close</button>
+        <button class="btn btn-primary" id="risk-modal-decision-btn">Log Decision</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Decision Modal -->
+  <div class="modal-overlay" id="decision-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Log Decision</h3>
+        <button class="modal-close" onclick="closeModal('decision-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="decision-form">
+          <input type="hidden" name="vendorId" id="decision-vendor-id">
+          <input type="hidden" name="vendorName" id="decision-vendor-name">
+          <input type="hidden" name="riskScore" id="decision-risk-score">
+          
+          <div class="form-group">
+            <label class="form-label required">Decision Type</label>
+            <select class="form-select" name="decisionType" required>
+              <option value="">Select type</option>
+              <option value="ONBOARDING">Onboarding</option>
+              <option value="RENEWAL">Renewal</option>
+              <option value="TERMINATION">Termination</option>
+              <option value="EXCEPTION">Exception Approval</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label required">Decision</label>
+            <select class="form-select" name="decision" required>
+              <option value="">Select decision</option>
+              <option value="APPROVED">Approved</option>
+              <option value="REJECTED">Rejected</option>
+              <option value="PENDING">Pending Review</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label required">Decided By</label>
+            <input type="text" class="form-input" name="decidedBy" required placeholder="e.g., Security Team">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label required">Reason</label>
+            <textarea class="form-textarea" name="reason" required placeholder="Provide justification for this decision..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('decision-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitDecision()">Submit Decision</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assessment Loading Modal -->
+  <div class="modal-overlay" id="assessment-modal">
+    <div class="modal">
+      <div class="modal-body" style="text-align: center; padding: 48px;">
+        <div class="loading-spinner" style="margin: 0 auto 20px;"></div>
+        <h3 style="margin-bottom: 12px;">Analyzing with 7 AI Services...</h3>
+        <p class="text-muted" id="assessment-status">Initializing Azure OpenAI...</p>
+        <div style="margin-top: 24px; text-align: left;">
+          <div class="evidence-list" id="assessment-progress">
+            <!-- Dynamic progress items -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
